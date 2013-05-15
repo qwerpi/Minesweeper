@@ -8,9 +8,9 @@ public class Main {
 	public static boolean display = true;
 
 	public static void main(String[] args) {
-		//MinesGame game = new MinesGame(9, 9, 10);
-		MinesGame game = new MinesGame(16, 16, 40);
-		//MinesGame game = new MinesGame(30, 16, 99);
+		//MinesGame game = new MinesGame(9, 9, 10);	// easy
+		MinesGame game = new MinesGame(16, 16, 40);	// medium
+		//MinesGame game = new MinesGame(30, 16, 99);	// hard
 		MinesAI ai = new MinesAI(game);
 		
 		if (display) {
@@ -18,11 +18,16 @@ public class Main {
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			frame.add(game);
 			frame.pack();
-			Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-			//frame.setLocation((screen.width - frame.getWidth()) / 2, (screen.height - frame.getHeight()) / 2);
+			// uncomment to center the JFrame
+			// In xfce on multiple monitors, this behaves as though there were a single monitor,
+			// which puts the frame in between them. It properly centers the frame in the primary
+			// monitor in Windows. Not sure about others window managers.
+			// Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+			// frame.setLocation((screen.width - frame.getWidth()) / 2, (screen.height - frame.getHeight()) / 2);
 			frame.setVisible(true);
 		}
 		
+		// count wins
 		int wins = 0;
 		for (int i = 0; i < 10000; i++) {
 			if (i % 100 == 0)

@@ -42,7 +42,7 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 		addKeyListener(this);
 	}
 
-	public void initArrays(int width, int height, int mines) {
+	private void initArrays(int width, int height, int mines) {
 		board = new int[width][height];
 		revealed = new int[width][height];
 
@@ -79,7 +79,7 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 		initArrays(width, height, mines);
 	}
 
-	public int neighborMines(int x, int y) {
+	private int neighborMines(int x, int y) {
 		int num = 0;
 		if (x > 0) {
 			if (y > 0)
@@ -102,7 +102,7 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 		return num;
 	}
 
-	public int neighborsflagged(int x, int y) {
+	private int neighborsFlagged(int x, int y) {
 		int num = 0;
 		if (x > 0) {
 			if (y > 0)
@@ -125,7 +125,8 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 		return num;
 	}
 
-	public void reveal(int x, int y) {
+	// either opens the clicked square or, if conditions are met, opens all of its neighbors
+	private void reveal(int x, int y) {
 		if (x < 0 || y < 0 || x >= board.length || y >= board[0].length || revealed[x][y] != 0)
 			return;
 		revealed[x][y] = 1;
@@ -150,7 +151,7 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 		}
 	}
 	
-	public boolean check(int x, int y) {
+	private boolean check(int x, int y) {
 		return x >= 0 && x < board.length && y >= 0 && y < board[0].length;
 	}
 	
@@ -164,12 +165,14 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 		win = true;
 	}
 	
+	// handle clicks
+	// can be called from mousePressed() or MinesAI
 	public void click(int x, int y) {
 		if (!check(x, y))
 			return;
 		if (revealed[x][y] == -1)
 			return;
-		if (revealed[x][y] == 1 && board[x][y] == neighborsflagged(x, y)) {
+		if (revealed[x][y] == 1 && board[x][y] == neighborsFlagged(x, y)) {
 			reveal(x - 1, y - 1);
 			reveal(x - 1, y);
 			reveal(x - 1, y + 1);
@@ -185,7 +188,9 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 		checkWin();
 		repaint();
 	}
-	
+
+	// handle right-clicks
+	// can be called from mousePressed() or MinesAI
 	public void flag(int x, int y) {
 		if (!check(x, y))
 			return;
@@ -199,6 +204,7 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 		repaint();
 	}
 	
+	// return a representation of the board for use by MinesAI
 	public int[][] getBoard() {
 		/*
 		 * Key
@@ -283,7 +289,7 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 		}
 	}
 
-	public void drawStringCentered(Graphics2D g, String s, int x, int y, int w, int h) {
+	private void drawStringCentered(Graphics2D g, String s, int x, int y, int w, int h) {
 		g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, h - 8));
 		FontRenderContext frc = g.getFontRenderContext();
 		Rectangle2D bounds = g.getFont().getStringBounds(s, frc);
@@ -299,7 +305,8 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		paint(g2);
 	}
-
+	
+	// double-buffered canvas
 	public void update(Graphics g) {
 		Graphics offgc;
 		Image offscreen = null;
@@ -316,6 +323,7 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 	public void mouseClicked(MouseEvent e) {
 	}
 
+	// convert mouse click location to a coordinate on the board and click or flag if applicable
 	public void mousePressed(MouseEvent e) {
 		if (win || lose)
 			return;
@@ -343,6 +351,7 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 	public void keyTyped(KeyEvent e) {
 	}
 
+	// some keyboard shortcuts
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_F5) {
 			reset();
