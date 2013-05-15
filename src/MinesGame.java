@@ -21,8 +21,8 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 	boolean firstClick = true;
 	int backup = 0;
 	boolean lose = false;
-	int width, height, mines, marked;
-	int pressedX, pressedY;
+	boolean win = false;
+	int width, height, mines, flagged;
 
 	public MinesGame(int width, int height, int mines) throws IllegalArgumentException {
 		this.width = width;
@@ -46,9 +46,6 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 		board = new int[width][height];
 		revealed = new int[width][height];
 
-		lose = false;
-		firstClick = true;
-
 		int[] coords = new int[width * height];
 		for (int i = 0; i < coords.length; i++) {
 			coords[i] = i;
@@ -70,6 +67,16 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 				// revealed[i][j] = true;
 			}
 		}
+	}
+	
+	public void reset() {
+		lose = false;
+		win = false;
+		firstClick = true;
+		
+		flagged = 0;
+		
+		initArrays(width, height, mines);
 	}
 
 	public int neighborMines(int x, int y) {
@@ -95,7 +102,7 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 		return num;
 	}
 
-	public int neighborsMarked(int x, int y) {
+	public int neighborsflagged(int x, int y) {
 		int num = 0;
 		if (x > 0) {
 			if (y > 0)
@@ -142,12 +149,83 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 			reveal(x + 1, y + 1);
 		}
 	}
+	
+	public boolean check(int x, int y) {
+		return x >= 0 && x < board.length && y >= 0 && y < board[0].length;
+	}
+	
+	public void checkWin() {
+		for (int i = 0; i < width; i++) {
+			for (int j = 0; j < height; j++) {
+				if (board[i][j] != -1 && revealed[i][j] != 1)
+					return;
+			}
+		}
+		win = true;
+	}
+	
+	public void click(int x, int y) {
+		if (!check(x, y))
+			return;
+		if (revealed[x][y] == -1)
+			return;
+		if (revealed[x][y] == 1 && board[x][y] == neighborsflagged(x, y)) {
+			reveal(x - 1, y - 1);
+			reveal(x - 1, y);
+			reveal(x - 1, y + 1);
+			reveal(x, y - 1);
+			reveal(x, y + 1);
+			reveal(x + 1, y - 1);
+			reveal(x + 1, y);
+			reveal(x + 1, y + 1);
+		} else {
+			reveal(x, y);
+		}
+		firstClick = false;
+		checkWin();
+		repaint();
+	}
+	
+	public void flag(int x, int y) {
+		if (!check(x, y))
+			return;
+		if (revealed[x][y] == 0) {
+			revealed[x][y] = -1;
+			flagged++;
+		} else if (revealed[x][y] == -1) {
+			revealed[x][y] = 0;
+			flagged--;
+		}
+		repaint();
+	}
+	
+	public int[][] getBoard() {
+		/*
+		 * Key
+		 *  -2 : unflagged
+		 *  -1 : flagged
+		 * 0-9 : revealed
+		 */
+		int[][] res = new int[width][height];
+		for (int i = 0; i < width; i++) {
+			for (int j = 0; j < height; j++) {
+				if (board[i][j] > 0)
+					res[i][j] = board[i][j];
+				else if (revealed[i][j] == -1)
+					res[i][j] = -1;
+				else if (revealed[i][j] == 0)
+					res[i][j] = -2;
+			}
+		}
+		return res;
+	}
 
 	public void paint(Graphics2D g) {
 		g.setColor(Color.black);
-		g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 20));
+		g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, Math.min(20, getWidth() / 30)));
 		g.drawString("Total Mines: " + mines, 20, 40);
-		g.drawString("Mines Marked: " + marked, getWidth() / 2, 40);
+		g.drawString("Mines flagged: " + flagged, getWidth() / 3, 40);
+		g.drawString("Mines Remaining: " + (mines - flagged), getWidth() * 2 / 3, 40);
 		for (int i = 0; i < board.length; i++) {
 			for (int j = 0; j < board[i].length; j++) {
 				g.setColor(Color.black);
@@ -198,6 +276,11 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 				}
 			}
 		}
+		
+		if (win) {
+			g.setColor(Color.green);
+			drawStringCentered(g, "YOU WIN!", 0, 0, width, 40);
+		}
 	}
 
 	public void drawStringCentered(Graphics2D g, String s, int x, int y, int w, int h) {
@@ -234,36 +317,18 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 	}
 
 	public void mousePressed(MouseEvent e) {
-		if (lose)
+		if (win || lose)
 			return;
-		int x = (e.getX() / size);
-		int y = ((e.getY() - 50) / size);
+		int x = (int) Math.floor((double)(e.getX()) / size);
+		int y = (int) Math.floor((double)(e.getY() - 50) / size);
+		
+		//System.out.printf("(%d, %d)\n", x, y);
+		
 		if (e.getButton() == MouseEvent.BUTTON1) {
-			if (revealed[x][y] == -1)
-				return;
-			if (revealed[x][y] == 1 && board[x][y] == neighborsMarked(x, y)) {
-				reveal(x - 1, y - 1);
-				reveal(x - 1, y);
-				reveal(x - 1, y + 1);
-				reveal(x, y - 1);
-				reveal(x, y + 1);
-				reveal(x + 1, y - 1);
-				reveal(x + 1, y);
-				reveal(x + 1, y + 1);
-			} else {
-				reveal(x, y);
-			}
-			firstClick = false;
+			click(x, y);
 		} else {
-			if (revealed[x][y] == 0) {
-				revealed[x][y] = -1;
-				marked++;
-			} else if (revealed[x][y] == -1) {
-				revealed[x][y] = 0;
-				marked--;
-			}
+			flag(x, y);
 		}
-		repaint();
 	}
 
 	public void mouseReleased(MouseEvent e) {
@@ -280,7 +345,7 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_F5) {
-			initArrays(width, height, mines);
+			reset();
 			repaint();
 		}
 		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
