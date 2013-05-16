@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -77,6 +78,8 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 		flagged = 0;
 		
 		initArrays(width, height, mines);
+		
+		repaint();
 	}
 
 	private int neighborMines(int x, int y) {
@@ -228,10 +231,10 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 
 	public void paint(Graphics2D g) {
 		g.setColor(Color.black);
-		g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, Math.min(20, getWidth() / 30)));
-		g.drawString("Total Mines: " + mines, 20, 40);
-		g.drawString("Mines flagged: " + flagged, getWidth() / 3, 40);
-		g.drawString("Mines Remaining: " + (mines - flagged), getWidth() * 2 / 3, 40);
+		g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, Math.min(20, getWidth() / 35)));
+		drawStringCentered(g, "Total Mines: " + mines, 0, 0, getWidth() / 3, 50);
+		drawStringCentered(g, "Mines Flagged: " + flagged, getWidth() / 3, 0, getWidth() / 3, 50);
+		drawStringCentered(g, "Mines Remaining: " + (mines - flagged), getWidth() * 2/ 3, 0, getWidth() / 3, 50);
 		for (int i = 0; i < board.length; i++) {
 			for (int j = 0; j < board[i].length; j++) {
 				g.setColor(Color.black);
@@ -267,6 +270,7 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 							g.setColor(Color.gray);
 							break;
 						}
+						g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, size - 9));
 						drawStringCentered(g, board[i][j] + "", i * size + 1, j * size + 51, size - 1, size - 1);
 					}
 				} else if (revealed[i][j] == -1) {
@@ -285,16 +289,20 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 		
 		if (win) {
 			g.setColor(Color.green);
+			g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 32));
 			drawStringCentered(g, "YOU WIN!", 0, 0, width, 40);
+		} else if (lose) {
+			g.setColor(Color.red);
+			g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 32));
+			drawStringCentered(g, "YOU LOSE!", 0, 0, width, 40);
 		}
 	}
 
 	private void drawStringCentered(Graphics2D g, String s, int x, int y, int w, int h) {
-		g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, h - 8));
 		FontRenderContext frc = g.getFontRenderContext();
 		Rectangle2D bounds = g.getFont().getStringBounds(s, frc);
-		int dx = (int) ((w - bounds.getWidth()) / 2);
-		int dy = (int) ((h + bounds.getHeight()) / 2);
+		int dx = Math.max(0, (int) ((w - bounds.getWidth()) / 2));
+		int dy = Math.max(0, (int) ((h + bounds.getHeight()) / 2));
 		g.drawString(s, x + dx, y + dy);
 	}
 
@@ -325,8 +333,12 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 
 	// convert mouse click location to a coordinate on the board and click or flag if applicable
 	public void mousePressed(MouseEvent e) {
-		if (win || lose)
+		if (win || lose) {
+			if (e.getY() < 50) {
+				reset();
+			}
 			return;
+		}
 		int x = (int) Math.floor((double)(e.getX()) / size);
 		int y = (int) Math.floor((double)(e.getY() - 50) / size);
 		
@@ -355,7 +367,6 @@ public class MinesGame extends Canvas implements MouseListener, KeyListener {
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_F5) {
 			reset();
-			repaint();
 		}
 		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 			System.exit(0);
