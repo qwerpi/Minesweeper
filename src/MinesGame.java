@@ -5,7 +5,6 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -16,14 +15,14 @@ import java.awt.geom.Rectangle2D;
 
 public class MinesGame extends Canvas implements MouseListener, KeyListener {
 
-	int[][] revealed;
-	int[][] board;
-	int size = 30;
-	boolean firstClick = true;
-	int backup = 0;
+	private int[][] revealed;
+	private int[][] board;
+	private int size = 30;
+	private boolean firstClick = true;
+	private int backup = 0;
 	boolean lose = false;
 	boolean win = false;
-	int width, height, mines, flagged;
+	private int width, height, mines, flagged;
 
 	public MinesGame(int width, int height, int mines) throws IllegalArgumentException {
 		this.width = width;

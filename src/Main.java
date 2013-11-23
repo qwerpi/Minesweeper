@@ -1,5 +1,3 @@
-import java.awt.Dimension;
-import java.awt.Toolkit;
 import javax.swing.JFrame;
 
 
@@ -9,9 +7,9 @@ public class Main {
 	private static boolean ai = true;
 
 	public static void main(String[] args) {
-		MinesGame game = new MinesGame(9, 9, 10);	// easy
+		//MinesGame game = new MinesGame(9, 9, 10);	// easy
 		//MinesGame game = new MinesGame(16, 16, 40);	// medium
-		//MinesGame game = new MinesGame(30, 16, 99);	// hard
+		MinesGame game = new MinesGame(30, 16, 99);	// hard
 		
 		if (display) {
 			JFrame frame = new JFrame("Minesweeper");

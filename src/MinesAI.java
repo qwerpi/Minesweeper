@@ -141,6 +141,8 @@ public class MinesAI {
 		if (obv)
 			return;
 		
+		if (true)	return;
+		
 		if (debug) System.out.println("===Random===");
 		ArrayList<Point> unmarked = new ArrayList<Point>();
 		for (int x = 0; x < board.length; x++) {
